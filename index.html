@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Подключение VPN</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1115; color: #e8eaed; padding: 24px;
+    }
+    .card {
+      width: 100%; max-width: 420px; text-align: center;
+      background: #1a1d24; border: 1px solid #2a2e38;
+      border-radius: 18px; padding: 32px 24px;
+    }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    p { color: #9aa0aa; font-size: 14px; line-height: 1.5; margin: 0 0 20px; }
+    .btn {
+      display: block; width: 100%; padding: 14px;
+      border: none; border-radius: 12px; margin-bottom: 12px;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      text-decoration: none; color: #fff;
+    }
+    .btn-primary { background: #3b82f6; }
+    .btn-secondary { background: #2a2e38; color: #e8eaed; }
+    .hint { font-size: 12px; color: #6b7280; margin-top: 16px; word-break: break-all; }
+    .spinner {
+      width: 28px; height: 28px; margin: 0 auto 16px;
+      border: 3px solid #2a2e38; border-top-color: #3b82f6;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spinner"></div>
+    <h1>Открываем приложение…</h1>
+    <p id="status">Если ничего не произошло, выберите приложение вручную:</p>
+
+    <a id="happ" class="btn btn-primary" href="#">📱 Открыть в Happ</a>
+    <a id="v2raytun" class="btn btn-primary" href="#">📱 Открыть в v2rayTun</a>
+    <button id="copy" class="btn btn-secondary">📋 Скопировать ссылку</button>
+
+    <div class="hint" id="rawlink"></div>
+  </div>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var app = (params.get("app") || "").toLowerCase();
+      var sub = params.get("u") || "";
+
+      // Схемы deep-link для приложений
+      function buildScheme(name) {
+        switch (name) {
+          case "happ":      return "happ://add/" + sub;
+          case "v2raytun":  return "v2raytun://import/" + sub;
+          default:          return "";
+        }
+      }
+
+      // Проставляем ссылки на кнопки
+      document.getElementById("happ").href = buildScheme("happ");
+      document.getElementById("v2raytun").href = buildScheme("v2raytun");
+
+      // Показываем «сырую» подписку + копирование
+      var raw = document.getElementById("rawlink");
+      raw.textContent = sub;
+      document.getElementById("copy").addEventListener("click", function () {
+        navigator.clipboard.writeText(sub).then(function () {
+          document.getElementById("status").textContent = "Ссылка скопирована ✅";
+        });
+      });
+
+      // Автоматический редирект, если приложение указано
+      var target = buildScheme(app);
+      if (target) {
+        location.href = target;
+      } else {
+        document.querySelector(".spinner").style.display = "none";
+        document.querySelector("h1").textContent = "Выберите приложение";
+      }
+    })();
+  </script>
+</body>
+</html>
